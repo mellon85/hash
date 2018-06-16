@@ -4,11 +4,15 @@
 module Main (main) where
 
 import Data.List ( nub )
-import Data.Version ( showVersion )
-import Distribution.Package ( PackageName(PackageName), Package, PackageId, InstalledPackageId, packageVersion, packageName )
+import Distribution.Types.UnitId
+import Distribution.Types.MungedPackageId
+import Distribution.Types.MungedPackageName ( unMungedPackageName )
+import Distribution.Pretty ( prettyShow )
+import Distribution.Types.UnqualComponentName ( unUnqualComponentName )
+import Distribution.Package ( Package, PackageId, InstalledPackageId, packageVersion, packageName, unPackageName )
 import Distribution.PackageDescription ( PackageDescription(), TestSuite(..) )
 import Distribution.Simple ( defaultMainWithHooks, UserHooks(..), simpleUserHooks )
-import Distribution.Simple.Utils ( rewriteFile, createDirectoryIfMissingVerbose, copyFiles )
+import Distribution.Simple.Utils ( rewriteFileEx, createDirectoryIfMissingVerbose, copyFiles )
 import Distribution.Simple.BuildPaths ( autogenModulesDir )
 import Distribution.Simple.Setup ( BuildFlags(buildVerbosity), Flag(..), fromFlag, HaddockFlags(haddockDistPref))
 import Distribution.Simple.LocalBuildInfo ( withLibLBI, withTestLBI, LocalBuildInfo(), ComponentLocalBuildInfo(componentPackageDeps) )
@@ -39,17 +43,16 @@ generateBuildModule verbosity pkg lbi = do
   createDirectoryIfMissingVerbose verbosity True dir
   withLibLBI pkg lbi $ \_ libcfg -> do
     withTestLBI pkg lbi $ \suite suitecfg -> do
-      rewriteFile (dir </> "Build_" ++ testName suite ++ ".hs") $ unlines
-        [ "module Build_" ++ testName suite ++ " where"
+      rewriteFileEx verbosity (dir </> "Build_" ++ unUnqualComponentName (testName suite) ++ ".hs") $ unlines
+        [ "module Build_" ++ unUnqualComponentName (testName suite) ++ " where"
         , "deps :: [String]"
         , "deps = " ++ (show $ formatdeps (testDeps libcfg suitecfg))
         ]
   where
     formatdeps = map (formatone . snd)
-    formatone p = case packageName p of
-      PackageName n -> n ++ "-" ++ showVersion (packageVersion p)
+    formatone p = (unMungedPackageName $ mungedName p) -- ++ "-" ++ prettyShow (packageVersion p)
 
-testDeps :: ComponentLocalBuildInfo -> ComponentLocalBuildInfo -> [(InstalledPackageId, PackageId)]
+testDeps :: ComponentLocalBuildInfo -> ComponentLocalBuildInfo -> [(UnitId, MungedPackageId)]
 testDeps xs ys = nub $ componentPackageDeps xs ++ componentPackageDeps ys
 
 \end{code}
