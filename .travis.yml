@@ -3,7 +3,6 @@ before_install:
   - cabal update
 
 install:
-  - cabal configure $mode
   - cabal build
   - cabal haddock
 
