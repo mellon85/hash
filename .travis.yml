@@ -1,12 +1,11 @@
 language: haskell
 before_install:
-  # Uncomment whenever hackage is down.
-  # - mkdir -p ~/.cabal && cp travis/config ~/.cabal/config && cabal update
   - cabal update
 
 install:
   - cabal configure $mode
   - cabal build
+  - cabal haddock
 
 script:
   - $script && hlint src --cpp-define HLINT
