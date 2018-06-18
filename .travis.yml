@@ -9,5 +9,6 @@ ghc:
   - "7.8"
 
 install:
+  - cabal install data-default
   - cabal configure --enable-tests && cabal build && cabal test
   - cabal haddock
