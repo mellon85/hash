@@ -50,7 +50,7 @@ update :: Int32 -> Word8 -> Word8 -> Int32
 update hash x y = rotateR hash 1 `xor` lut x `xor` lut y
 {-# INLINE update #-}
 
--- | Take a strict 'S.ByteString' and generate a new lazy 'L.ByteString' with chunks based on a rolling
+-- | Take a lazy 'L.ByteString' and generate a new lazy 'L.ByteString' with chunks based on a rolling
 -- hash. This generates chunks with an expected size of 8k, where the sizes vary between 128 bytes and 64k each.
 -- and the breakpoints are based on moments where a rolling hash function applied to the last 128 bytes of the
 -- input matches a mask.
