@@ -11,6 +11,6 @@ ghc:
 install:
   # - cabal install data-default hashable 
   - cabal sandbox init
-  - configure --enable-tests
+  - cabal configure --enable-tests
   - cabal build && cabal test
   - cabal haddock
